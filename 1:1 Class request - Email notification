@@ -1,0 +1,78 @@
+function onFormSubmit(e) {  
+      sendEmail(e.range);
+}
+
+function sendEmail(range){
+//SS
+  var values = range.getValues();
+  var row = values[0];
+  
+//Values
+  var name = row[1];
+  var telefono = row[2];
+  var emailAdd = row[3];
+  var idioma = row[4];
+  var horario = row[5];
+  var duracion = row[6];
+  var numeroDeHoras = row[7];
+  var bono = row[8];
+  var fechaDeIncio = row[9];
+  var fechaDeFin = row[10];
+  var detalles = row[11];
+  var enviadoPor = row[12];
+  
+//Get URL of this spreadsheet  
+  var URLOfSS = SpreadsheetApp.getActiveSpreadsheet().getUrl();
+
+//Get URL of 1:1 attendance spreadsheet  
+  var URLOfAttend = "https://docs.google.com/spreadsheets/d/1ncseg35ybFRMSeEcvuNA_P4dYQcwb3SQSrwEy9bZVr4/edit";
+
+//Change date and time format
+  var timeZone = Session.getScriptTimeZone()
+
+  if(fechaDeIncio !== ""){
+    var fechaDeIncioEdit = Utilities.formatDate(fechaDeIncio, timeZone, 'dd-MM-yyyy HH.mm');
+  } else {
+    var fechaDeIncioEdit = "---";
+       }
+
+  if(fechaDeFin !== ""){    
+    var fechaDeFinEdit = Utilities.formatDate(fechaDeFin, timeZone, 'dd-MM-yyyy HH.mm');
+  } else {
+    var fechaDeFinEdit = "---";
+  }
+  
+//Add sender's email to email list
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  ss.getSheetByName("Emails");
+  var addSenderEmail = ss.setActiveSelection("B6").setValue(enviadoPor);
+  
+//Get all emails
+  var contacts = ss.getSheetByName("Emails");
+  var numRows = contacts.getLastRow();
+  var emailRecipients = contacts.getRange(2, 2, numRows-1, 1).getValues();
+
+//Prepare email
+  var emailSubject = "Petición de una clase particular - " + name;
+  var emailBody = "<h3>Petición de una clase particular: <br />" + name + "</h3><hr /> \
+  <p> \
+  <strong>HORARIO PEDIDO: </strong>"+horario+"<br /> \
+  <strong>DURACIÓN: </strong>"+duracion+"<br /> \
+  <strong>NÚMERO DE HORAS: </strong>"+numeroDeHoras+"<br /> \
+  <strong>FECHA DE INCIO: </strong>"+fechaDeIncioEdit+"<br /> \
+  <strong>FECHA DE FIN: </strong>"+fechaDeFinEdit+"<br /> \
+  <strong>BONO: </strong>"+bono+"<br /> \
+  <strong>DETALLES: </strong>"+detalles+"<hr /> \
+  <strong>TELÉFONO: </strong>"+telefono+"<br /> \
+  <strong>EMAIL: </strong>"+emailAdd+"<br /> \
+  </p><p><hr /> \
+  <strong>EL LISTADO DE LAS CLASES 1:1s: <br /> \
+  </strong>"+URLOfSS+"<hr /> \
+  <strong>LA ASISTENCIA DE LAS CLASES 1:1s: <br /> \
+  </strong>"+URLOfAttend+"<hr /> \
+  <strong>ENVIADO POR: </strong>"+enviadoPor+"<hr /> \
+  ";
+
+//Send email
+  GmailApp.sendEmail(emailRecipients,emailSubject,'Hi', {htmlBody: emailBody});
+}
